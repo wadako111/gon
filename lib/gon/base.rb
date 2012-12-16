@@ -23,7 +23,7 @@ class Gon
           end
         end
 
-        script << "$.extend(#{actual_namespace}||null, window.#{namespace};" if extends
+        script << "$.extend(#{actual_namespace}||null, window.#{namespace});" if extends
 
         script = start + Gon::Escaper.escape(script)
         script << Gon.watch.render if watch and Gon::Watch.all_variables.present?

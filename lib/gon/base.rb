@@ -7,7 +7,11 @@ class Gon
         if Gon.global.all_variables.present?
           data[:global] = Gon.global.all_variables
         end
-        namespace, tag, cameled, watch = parse_options options
+        namespace, tag, cameled, watch, extends = parse_options options
+        if extends
+          actual_namespace = namespace 
+          namespace = "tmp_#{actual_namespace}" 
+        end
         start     = "#{tag if tag}window.#{namespace} = {};"
         script    = ''
 
@@ -18,6 +22,8 @@ class Gon
             script << "#{namespace}.#{key.to_s}=#{val.to_json};"
           end
         end
+
+        script << "$.extend(#{actual_namespace}||null, window.#{namespace};" if extends
 
         script = start + Gon::Escaper.escape(script)
         script << Gon.watch.render if watch and Gon::Watch.all_variables.present?
@@ -56,8 +62,9 @@ class Gon
         cameled    = options[:camel_case]
         watch      = options[:watch]
         tag = need_tag && (need_type ? '<script type="text/javascript">' : '<script>')
+        extends    = options[:extend]
 
-        [namespace, tag, cameled, watch]
+        [namespace, tag, cameled, watch, extends]
       end
 
       def right_extension?(extension, template_path)
